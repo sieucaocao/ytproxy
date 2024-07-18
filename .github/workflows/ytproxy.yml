@@ -4,29 +4,33 @@ on: workflow_dispatch
 jobs:
   release:
     name: release ${{ matrix.target }}
-    runs-on: ubuntu-20.04
+    runs-on: windows-latest
     strategy:
       fail-fast: false
       matrix:
         include:
           - target: x86_64-pc-windows-gnu
             archive: zip
-          - target: x86_64-pc-windows-msvc
-            archive: zip
-          #- target: x86_64-unknown-linux-gnu
-          #  archive: tar.gz tar.xz tar.zst
-          #- target: x86_64-unknown-linux-musl
-          #  archive: tar.gz tar.xz tar.zst
+          #- target: x86_64-pc-windows-msvc
+          #  archive: zip
+          - target: x86_64-unknown-linux-gnu
+            archive: tar.gz tar.xz tar.zst
+          - target: x86_64-unknown-linux-musl
+            archive: tar.gz tar.xz tar.zst
           #- target: x86_64-apple-darwin
           #  archive: zip
     steps:
       - uses: actions/checkout@master
-      - run: sudo apt install libssl-dev
+      - name: Install Rust
+        run: |
+          choco install rust
+          refreshenv
+      - name: Install OpenSSL
+        run: choco install openssl
       - name: Compile and release
         uses: rust-build/rust-build.action@v1.4.5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RUST_BACKTRACE: full
         with:
           RUSTTARGET: ${{ matrix.target }}
           ARCHIVE_TYPES: ${{ matrix.archive }}
@@ -43,5 +47,6 @@ jobs:
           automatic_release_tag: all
           prerelease: false
           files: |
-            mpv/scripts/ytproxy/target/x86_64-pc-windows-gnu/release/deps/http-ytproxy-*
+            mpv/scripts/ytproxy/target/x86_64-unknown-linux-musl/release/deps/http_ytproxy-*
+            mpv/scripts/ytproxy/target/x86_64-unknown-linux-gnu/release/deps/http_ytproxy-*
           repo_token: ${{ secrets.GITHUB_TOKEN }}
