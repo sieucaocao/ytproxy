@@ -23,6 +23,7 @@ jobs:
       - uses: actions/checkout@master
       - run: sudo apt install libssl-dev openssl
       - run: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs
+      - run: chmod +x ./sh.rustup.rs
       - run: sh ./sh.rustup.rs
       - name: Compile and release
         uses: rust-build/rust-build.action@v1.4.5
